@@ -8,7 +8,7 @@
         android:name=".AdsSwitchApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="AdsSwitch"
+        android:label="@string/app_name"
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
         android:networkSecurityConfig="@xml/network_security_config"

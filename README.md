@@ -1,34 +1,17 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# מודעות (adsSwitch)
 
-## Getting Started
+One screen on the phone: run the **local** Google Ads set (35 km around Be'er Sheva
+and Midreshet Ben-Gurion), the **nationwide** set, or **turn everything off** — one tap
+switches all campaigns together.
 
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **The work is the daemon's**: `d adsArea [--mode local|nationwide|off] [--json 1]`
+  (`/opt/automateLinux/utilities/adsArea.py`). The nationwide ↔ local pairing is
+  `/opt/automateLinux/data/ads-area-pairs.json` on the desktop, which is why the
+  backend runs on the **desktop**.
+- **Backend**: Next.js on `10.7.0.2:3155` (dev), `GET/POST /api/area`, bearer-token
+  guarded (`ADS_SWITCH_API_TOKEN` in `.env.local`). It turns paid advertising on and
+  off and listens on the LAN too, so it refuses every call without the token.
+- **Phone**: `mobile/` (KMP), package `com.automatelinux.adsSwitch.dev`, launcher name
+  **מודעות**. Base URL and token are baked in from the gitignored `mobile/.env`
+  (`API_BASE_URL`, `API_TOKEN`). The phone reaches the backend directly over
+  WireGuard, never through nginx.

@@ -19,7 +19,12 @@ val gitShortHash = providers.exec {
 val envFile = rootProject.file(".env")
 val envProps = Properties()
 if (envFile.exists()) envFile.inputStream().use { envProps.load(it) }
-val apiBaseUrl = envProps.getProperty("API_BASE_URL", "http://10.7.0.1:3155/")
+// The backend runs on the DESKTOP (10.7.0.2): the Google Ads credentials and the
+// nationwide/local pairing file live there, not on the leader.
+val apiBaseUrl = envProps.getProperty("API_BASE_URL", "http://10.7.0.2:3155/")
+// The backend refuses every unauthenticated call; an empty token builds, and the
+// app then says "no token in this build" instead of failing at gradlew time.
+val apiToken = envProps.getProperty("API_TOKEN", "")
 
 android {
     namespace = "com.automatelinux.adsSwitch"
@@ -32,6 +37,7 @@ android {
         versionCode = gitCommitCount
         versionName = "v${gitCommitCount} (${gitShortHash})"
         buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
+        buildConfigField("String", "API_TOKEN", "\"$apiToken\"")
     }
 
     buildTypes {

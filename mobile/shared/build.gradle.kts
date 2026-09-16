@@ -30,6 +30,10 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.datetime)
             implementation(libs.multiplatform.settings)
+            // Explicit, not transitive: `implementation` hides a dependency's own
+            // dependencies, so Dispatchers/withContext in androidMain would not
+            // resolve through compose.runtime.
+            implementation(libs.kotlinx.coroutines.core)
         }
     }
 }
