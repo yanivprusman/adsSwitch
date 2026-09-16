@@ -1,0 +1,7 @@
+{
+  "description": "מודעות — one tap switches Google Ads between the nationwide set and the local set (Be'er Sheva + Midreshet Ben-Gurion), or turns them all off",
+  "icon": "Megaphone",
+  "sharedLibs": [
+    "android-feedback-lib"
+  ]
+}
