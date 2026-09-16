@@ -28,7 +28,6 @@ import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -63,6 +62,8 @@ import com.automatelinux.adsSwitch.ui.InlineError
 import com.automatelinux.adsSwitch.ui.ModeSwitch
 import com.automatelinux.adsSwitch.ui.SectionCard
 import com.automatelinux.adsSwitch.ui.SkeletonLines
+import com.automatelinux.adsSwitch.ui.UndoStrip
+import com.automatelinux.adsSwitch.ui.modeShort
 import com.automatelinux.adsSwitch.ui.theme.AppTheme
 import com.automatelinux.adsSwitch.ui.theme.Palette
 import kotlinx.coroutines.async
@@ -97,6 +98,10 @@ fun App(baseUrl: String, token: String, resumeKey: Int = 0) {
     var geoLoading by remember { mutableStateOf(false) }
     var refreshing by remember { mutableStateOf(false) }
     var pending by remember { mutableStateOf<String?>(null) }
+    // The undo offer for the last switch: which mode to go back to, and a key
+    // that restarts its countdown when a newer switch replaces it.
+    var undoTo by remember { mutableStateOf<String?>(null) }
+    var undoKey by remember { mutableIntStateOf(0) }
 
     suspend fun loadState() {
         val s = api.state()
@@ -141,6 +146,7 @@ fun App(baseUrl: String, token: String, resumeKey: Int = 0) {
         if (pending != null) return
         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
         // An undo offer for the previous switch no longer describes the state.
+        undoTo = null
         snackbar.currentSnackbarData?.dismiss()
         pending = target
         scope.launch {
@@ -154,19 +160,12 @@ fun App(baseUrl: String, token: String, resumeKey: Int = 0) {
             stateError = ""
             haptics.performHapticFeedback(HapticFeedbackType.LongPress)
             val from = s.changedFrom
-            val undoable = !isUndo && from != null && from != "mixed"
-            val said = when (s.mode) {
-                "local" -> "המודעות רצות עכשיו באזור שלך"
-                "nationwide" -> "המודעות רצות עכשיו בכל הארץ"
-                "off" -> "כל המודעות כבויות"
-                else -> "חלק מהמודעות פועלות"
+            if (!isUndo && from != null && from != "mixed") {
+                undoTo = from
+                undoKey++
+            } else if (isUndo) {
+                snackbar.showSnackbar("בוטל — חזר ל${modeShort(s.mode)}")
             }
-            val result = snackbar.showSnackbar(
-                message = if (isUndo) "בוטל. $said" else said,
-                actionLabel = if (undoable) "ביטול" else null,
-                duration = SnackbarDuration.Long,
-            )
-            if (result == SnackbarResult.ActionPerformed && from != null) switchTo(from, isUndo = true)
         }
     }
 
@@ -223,12 +222,23 @@ fun App(baseUrl: String, token: String, resumeKey: Int = 0) {
                                         enabled = pending == null,
                                         onSelect = { switchTo(it) },
                                     )
-                                    Spacer(Modifier.height(6.dp))
-                                    Text(
-                                        "כל ${s.sets.local.campaigns.size} הקמפיינים עוברים יחד. אפשר לבטל מיד אחרי.",
-                                        fontSize = 12.sp, color = Palette.InkFaint,
-                                        modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp),
-                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                    val offer = undoTo
+                                    if (offer != null && pending == null) {
+                                        UndoStrip(
+                                            nowMode = s.mode,
+                                            backTo = offer,
+                                            key = undoKey,
+                                            onUndo = { switchTo(offer, isUndo = true) },
+                                            onExpire = { undoTo = null },
+                                        )
+                                    } else {
+                                        Text(
+                                            "כל ${s.sets.local.campaigns.size} הקמפיינים עוברים יחד, ואפשר לבטל מיד אחרי.",
+                                            fontSize = 12.sp, color = Palette.InkFaint,
+                                            modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp),
+                                        )
+                                    }
                                 }
 
                                 GeoCard(
