@@ -129,10 +129,12 @@ fun AreaMap(
             if (maxCost <= 0.0) break
             val p = at(city.lat, city.lon)
             val weight = sqrt(city.costIls / maxCost).toFloat()
-            val r = (1.6f + 6.4f * weight) * density
-            val color = if (city.inArea) Palette.LocalGlow else Color(0xFFE8EEF5)
-            drawCircle(color.copy(alpha = 0.22f * alpha), r * 1.9f, p)
-            drawCircle(color.copy(alpha = 0.95f * alpha), r, p)
+            // Kept small: the centre of the country holds dozens of cities, and
+            // big halos merged them into one white blob.
+            val r = (1.3f + 3.9f * weight) * density
+            val color = if (city.inArea) Palette.LocalGlow else Color(0xFFDCE4EC)
+            drawCircle(color.copy(alpha = 0.16f * alpha), r * 1.6f, p)
+            drawCircle(color.copy(alpha = 0.9f * alpha), r, p)
         }
 
         for (c in centers) {

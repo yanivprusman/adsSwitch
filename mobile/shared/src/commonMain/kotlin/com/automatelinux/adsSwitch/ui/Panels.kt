@@ -110,7 +110,7 @@ fun Hero(state: AreaState, geo: GeoReport?, pendingMode: String?) {
             Text("היום", color = Color.White.copy(alpha = 0.6f), fontSize = 13.sp, fontWeight = FontWeight.Medium)
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(
-                    shekels(todayCost, forceAgorot = todayCost < 100),
+                    shekels(todayCost, forceAgorot = todayCost > 0 && todayCost < 100),
                     color = Color.White, fontSize = 34.sp, fontWeight = FontWeight.Black,
                 )
                 if (running != null) {
@@ -217,14 +217,14 @@ fun GeoCard(
     onRetry: () -> Unit,
 ) {
     SectionCard {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("מאיפה הגיעו הקליקים", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+        Text("מאיפה הגיעו הקליקים", style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(8.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             GEO_PERIODS.forEach { d ->
-                Spacer(Modifier.width(6.dp))
-                PeriodChip("$d ימים", selected = d == days) { onDays(d) }
+                PeriodChip(if (d == 7) "שבוע" else if (d == 30) "חודש" else "3 חודשים", selected = d == days) { onDays(d) }
             }
         }
-        Spacer(Modifier.height(14.dp))
+        Spacer(Modifier.height(16.dp))
 
         when {
             geo == null && error.isNotEmpty() -> InlineError(error, onRetry)
@@ -408,24 +408,25 @@ private fun CampaignRow(local: Campaign, national: Campaign?) {
             Spacer(Modifier.width(8.dp))
             StatusPill(runMode)
         }
-        Spacer(Modifier.height(8.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Meter(
-                if (running.budgetIls > 0) (cost / running.budgetIls).toFloat() else 0f,
-                fill = modeColor(runMode), track = Palette.OffSoft, height = 5.dp,
+        Spacer(Modifier.height(10.dp))
+        Meter(
+            if (running.budgetIls > 0) (cost / running.budgetIls).toFloat() else 0f,
+            fill = modeColor(runMode), track = Palette.OffSoft, height = 5.dp,
+        )
+        Spacer(Modifier.height(6.dp))
+        Row {
+            // Words, not "₪0 / ₪13": a slash between two amounts reorders
+            // unpredictably inside right-to-left text.
+            Text(
+                "היום ${shekels(cost, cost > 0 && cost < 100)} מתוך ${shekels(running.budgetIls)} ליום",
+                fontSize = 12.sp, color = Palette.InkSoft, fontWeight = FontWeight.Medium,
                 modifier = Modifier.weight(1f),
             )
-            Spacer(Modifier.width(10.dp))
             Text(
-                "${shekels(cost, cost in 0.01..99.99)} / ${shekels(running.budgetIls)}",
-                fontSize = 12.sp, color = Palette.InkSoft, fontWeight = FontWeight.Medium,
+                when (clicks) { 0 -> "אין קליקים"; 1 -> "קליק אחד"; else -> "${count(clicks)} קליקים" },
+                fontSize = 12.sp, color = Palette.InkFaint,
             )
         }
-        Spacer(Modifier.height(3.dp))
-        Text(
-            if (clicks == 0) "אין קליקים היום" else "${count(clicks)} קליקים היום",
-            fontSize = 12.sp, color = Palette.InkFaint,
-        )
     }
 }
 
