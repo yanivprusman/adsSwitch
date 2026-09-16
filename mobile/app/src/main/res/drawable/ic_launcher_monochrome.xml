@@ -1,15 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  מודעות — a map pin broadcasting: advertising that runs from a PLACE. The app's
+  whole job is choosing where the ads reach, so the mark is a location that
+  transmits, not a megaphone that could belong to any ad tool.
+
+  Drawn inside the 66dp safe circle (the outer arcs stop at radius ~32 from the
+  centre), checked at 48px next to the plain megaphone it replaced.
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp"
     android:viewportWidth="108" android:viewportHeight="108">
-    <!-- A megaphone: the app turns advertising on and off. Everything sits
-         inside the 66dp safe zone (21..87) so no launcher mask clips it. -->
-    <!-- rear box -->
-    <path android:fillColor="#000000" android:pathData="M33,46 h8 v16 h-8 a4,4 0 0 1 -4,-4 v-8 a4,4 0 0 1 4,-4 z" />
-    <!-- horn -->
-    <path android:fillColor="#000000" android:pathData="M43,46 L65,35.5 a3,3 0 0 1 4.3,2.7 v31.6 a3,3 0 0 1 -4.3,2.7 L43,62 z" />
-    <!-- handle -->
-    <path android:fillColor="#000000" android:pathData="M43,64 h7 l3.2,11 a2.5,2.5 0 0 1 -2.4,3.2 h-3.3 a2.5,2.5 0 0 1 -2.4,-1.8 z" />
-    <!-- sound -->
-    <path android:strokeColor="#000000" android:strokeWidth="4" android:strokeLineCap="round" android:pathData="M75,46 q4.5,8 0,16" />
-    <path android:strokeColor="#000000" android:strokeWidth="4" android:strokeLineCap="round" android:pathData="M81.5,40 q8,14 0,28" />
+    <path android:fillColor="#000000" android:fillType="evenOdd"
+        android:pathData="M54,77 C47,68 39.5,58.5 39.5,49 A14.5,14.5 0 1 1 68.5,49 C68.5,58.5 61,68 54,77 Z M54,43.2 A5.8,5.8 0 1 0 54.01,43.2 Z" />
+    <path android:strokeColor="#000000" android:strokeWidth="4.2" android:strokeLineCap="round"
+        android:pathData="M33.5,40 Q28.5,50 33.5,60" />
+    <path android:strokeColor="#000000" android:strokeWidth="4.2" android:strokeLineCap="round"
+        android:pathData="M74.5,40 Q79.5,50 74.5,60" />
+    <path android:strokeColor="#000000" android:strokeWidth="4.2" android:strokeLineCap="round" android:strokeAlpha="0.45"
+        android:pathData="M25.5,38 Q19.5,50 25.5,62" />
+    <path android:strokeColor="#000000" android:strokeWidth="4.2" android:strokeLineCap="round" android:strokeAlpha="0.45"
+        android:pathData="M82.5,38 Q88.5,50 82.5,62" />
 </vector>
