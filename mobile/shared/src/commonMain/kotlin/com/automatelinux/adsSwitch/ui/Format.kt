@@ -35,7 +35,7 @@ fun modeTitle(mode: String): String = when (mode) {
 }
 
 fun modeShort(mode: String): String = when (mode) {
-    "local" -> "אזורי"
+    "local" -> "האזור שלי"
     "nationwide" -> "כל הארץ"
     "south" -> "דרום"
     "center" -> "מרכז"

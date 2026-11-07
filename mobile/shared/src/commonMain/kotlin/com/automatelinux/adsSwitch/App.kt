@@ -61,6 +61,7 @@ import com.automatelinux.adsSwitch.ui.HeroSkeleton
 import com.automatelinux.adsSwitch.ui.InlineError
 import com.automatelinux.adsSwitch.ui.ModeSwitch
 import com.automatelinux.adsSwitch.ui.SectionCard
+import com.automatelinux.adsSwitch.ui.SiteTabs
 import com.automatelinux.adsSwitch.ui.SkeletonLines
 import com.automatelinux.adsSwitch.ui.UndoStrip
 import com.automatelinux.adsSwitch.ui.modeShort
@@ -73,10 +74,9 @@ import kotlinx.coroutines.launch
 /**
  * מודעות — where the Google Ads run, and whether that is working.
  *
- * Every campaign exists twice: nationwide, and a local twin limited to 35 km
- * around Be'er Sheva and Midreshet Ben-Gurion; the pigeon campaign also has a
- * copy each for the south, center and north. The switch picks which SET
- * runs; the daemon flips all of them in one atomic change.
+ * Every campaign exists once per version: nationwide, local (35 km around Be'er
+ * Sheva and Midreshet Ben-Gurion), south, center and north. Each site has its own
+ * switch, and the daemon flips that site's campaigns in one atomic change.
  *
  * Nothing is decided or assumed on the phone. What is shown as running is what
  * Google reported back — after a switch too — never what was tapped. A switch
@@ -102,6 +102,8 @@ fun App(baseUrl: String, token: String, resumeKey: Int = 0) {
     // The undo offer for the last switch: which mode to go back to, and a key
     // that restarts its countdown when a newer switch replaces it.
     var undoTo by remember { mutableStateOf<String?>(null) }
+    var undoSite by remember { mutableStateOf("") }
+    var selectedSite by remember { mutableStateOf("pigeons") }
     var undoKey by remember { mutableIntStateOf(0) }
 
     suspend fun loadState() {
@@ -116,9 +118,10 @@ fun App(baseUrl: String, token: String, resumeKey: Int = 0) {
 
     suspend fun loadGeo(days: Int) {
         geoLoading = true
-        val g = api.geo(days)
-        // A slower answer for a period the user has since left must not win.
-        if (days == geoDays) {
+        val askedFor = selectedSite
+        val g = api.geo(days, askedFor)
+        // A slower answer for a period or site the user has since left must not win.
+        if (days == geoDays && askedFor == selectedSite) {
             if (g.ok) {
                 geo = g
                 geoError = ""
@@ -143,7 +146,7 @@ fun App(baseUrl: String, token: String, resumeKey: Int = 0) {
         refreshing = false
     }
 
-    fun switchTo(target: String, isUndo: Boolean = false) {
+    fun switchTo(siteId: String, target: String, isUndo: Boolean = false) {
         if (pending != null) return
         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
         // An undo offer for the previous switch no longer describes the state.
@@ -151,7 +154,7 @@ fun App(baseUrl: String, token: String, resumeKey: Int = 0) {
         snackbar.currentSnackbarData?.dismiss()
         pending = target
         scope.launch {
-            val s = api.switchTo(target)
+            val s = api.switchTo(siteId, target)
             pending = null
             if (!s.ok) {
                 snackbar.showSnackbar("לא הוחלף: ${s.error ?: "שגיאה לא ידועה"}", duration = SnackbarDuration.Long)
@@ -163,6 +166,7 @@ fun App(baseUrl: String, token: String, resumeKey: Int = 0) {
             val from = s.changedFrom
             if (!isUndo && from != null && from != "mixed") {
                 undoTo = from
+                undoSite = siteId
                 undoKey++
             } else if (isUndo) {
                 snackbar.showSnackbar("בוטל — חזר ל${modeShort(s.mode)}")
@@ -214,28 +218,36 @@ fun App(baseUrl: String, token: String, resumeKey: Int = 0) {
                             else -> {
                                 if (stateError.isNotEmpty()) InlineError(stateError) { scope.launch { refreshAll() } }
 
-                                Hero(s, geo, pending)
+                                val site = s.sites.firstOrNull { it.id == selectedSite } ?: s.sites.first()
+
+                                SiteTabs(s.sites, site.id) { id ->
+                                    selectedSite = id
+                                    geo = null
+                                    scope.launch { loadGeo(geoDays) }
+                                }
+
+                                Hero(s, site, geo, pending)
 
                                 Column(Modifier.animateContentSize()) {
                                     ModeSwitch(
-                                        mode = s.mode,
+                                        mode = site.mode,
                                         pendingMode = pending,
                                         enabled = pending == null,
-                                        onSelect = { switchTo(it) },
+                                        onSelect = { switchTo(site.id, it) },
                                     )
                                     Spacer(Modifier.height(8.dp))
                                     val offer = undoTo
-                                    if (offer != null && pending == null) {
+                                    if (offer != null && pending == null && undoSite == site.id) {
                                         UndoStrip(
-                                            nowMode = s.mode,
+                                            nowMode = site.mode,
                                             backTo = offer,
                                             key = undoKey,
-                                            onUndo = { switchTo(offer, isUndo = true) },
+                                            onUndo = { switchTo(site.id, offer, isUndo = true) },
                                             onExpire = { undoTo = null },
                                         )
                                     } else {
                                         Text(
-                                            "הבחירה מעדכנת את כל הקמפיינים יחד, ואפשר לבטל מיד אחרי.",
+                                            "הבחירה חלה רק על ${site.label}, ואפשר לבטל מיד אחרי.",
                                             fontSize = 12.sp, color = Palette.InkFaint,
                                             modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp),
                                         )
@@ -254,7 +266,7 @@ fun App(baseUrl: String, token: String, resumeKey: Int = 0) {
                                     onRetry = { scope.launch { loadGeo(geoDays) } },
                                 )
 
-                                CampaignsCard(s)
+                                CampaignsCard(site)
                             }
                         }
                     }

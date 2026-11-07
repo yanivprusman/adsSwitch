@@ -53,6 +53,10 @@ data class Sets(
     fun of(mode: String): AdSet? = all.firstOrNull { it.first == mode }?.second
 }
 
+/** One advertised site, running exactly one version: its own switch. */
+@Serializable
+data class Site(val id: String, val label: String, val mode: String, val sets: Sets = Sets())
+
 @Serializable
 data class Center(val name: String, val he: String = "", val lat: Double, val lon: Double)
 
@@ -66,7 +70,7 @@ data class AreaState(
     val updatedAt: String = "",
     val radiusKm: Double = 35.0,
     val centers: List<Center> = emptyList(),
-    val sets: Sets = Sets(),
+    val sites: List<Site> = emptyList(),
 )
 
 @Serializable
@@ -100,7 +104,7 @@ data class GeoReport(
 )
 
 @Serializable
-private data class SwitchRequest(val mode: String)
+private data class SwitchRequest(val site: String, val mode: String)
 
 private val json = Json { ignoreUnknownKeys = true; isLenient = true }
 
@@ -114,15 +118,15 @@ class AdsApi(baseUrl: String, private val token: String) {
     suspend fun state(): AreaState =
         call("GET", "/api/area", null, AreaState.serializer()) { AreaState(error = it) }
 
-    suspend fun switchTo(mode: String): AreaState =
+    suspend fun switchTo(site: String, mode: String): AreaState =
         call(
             "POST", "/api/area",
-            json.encodeToString(SwitchRequest.serializer(), SwitchRequest(mode)),
+            json.encodeToString(SwitchRequest.serializer(), SwitchRequest(site, mode)),
             AreaState.serializer(),
         ) { AreaState(error = it) }
 
-    suspend fun geo(days: Int): GeoReport =
-        call("GET", "/api/area/geo?days=$days", null, GeoReport.serializer()) { GeoReport(error = it) }
+    suspend fun geo(days: Int, site: String): GeoReport =
+        call("GET", "/api/area/geo?days=$days&site=$site", null, GeoReport.serializer()) { GeoReport(error = it) }
 
     private suspend fun <T> call(
         method: String,

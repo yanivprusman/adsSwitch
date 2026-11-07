@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.sp
 import com.automatelinux.adsSwitch.data.AreaState
 import com.automatelinux.adsSwitch.data.Campaign
 import com.automatelinux.adsSwitch.data.GeoReport
+import com.automatelinux.adsSwitch.data.Site
 import com.automatelinux.adsSwitch.ui.theme.Palette
 import com.automatelinux.adsSwitch.ui.theme.modeColor
 import com.automatelinux.adsSwitch.ui.theme.modeGlow
@@ -59,12 +60,12 @@ import com.automatelinux.adsSwitch.ui.theme.modeGlow
  * first; the one big number shows the second.
  */
 @Composable
-fun Hero(state: AreaState, geo: GeoReport?, pendingMode: String?) {
-    val mode = state.mode
+fun Hero(state: AreaState, site: Site, geo: GeoReport?, pendingMode: String?) {
+    val mode = site.mode
     val glow by animateColorAsState(modeGlow(mode), tween(500))
-    val running = state.sets.of(mode)
-    val todayCost = state.sets.all.sumOf { it.second.todayCostIls }
-    val todayClicks = state.sets.all.sumOf { it.second.todayClicks }
+    val running = site.sets.of(mode)
+    val todayCost = site.sets.all.sumOf { it.second.todayCostIls }
+    val todayClicks = site.sets.all.sumOf { it.second.todayClicks }
 
     Row(
         Modifier
@@ -75,7 +76,7 @@ fun Hero(state: AreaState, geo: GeoReport?, pendingMode: String?) {
     ) {
         Column(Modifier.weight(1f)) {
             Text(
-                if (pendingMode != null) "מעביר ל${modeShort(pendingMode)}…" else "המודעות רצות עכשיו",
+                if (pendingMode != null) "מעביר ל${modeShort(pendingMode)}…" else "${site.label} · רצות עכשיו",
                 color = Color.White.copy(alpha = 0.6f), fontSize = 13.sp, fontWeight = FontWeight.Medium,
             )
             Spacer(Modifier.height(2.dp))
@@ -93,9 +94,9 @@ fun Hero(state: AreaState, geo: GeoReport?, pendingMode: String?) {
                                 "${state.radiusKm.toInt()} ק״מ סביב $names"
                             }
                             "nationwide" -> "כל ישראל. המעגלים המקווקווים הם האזור שלך."
-                            "south" -> "מחוז דרום, כולל אילת. רק קמפיין היונים פועל."
-                            "center" -> "מחוזות תל אביב והמרכז. רק קמפיין היונים פועל."
-                            "north" -> "מחוזות חיפה והצפון. רק קמפיין היונים פועל."
+                            "south" -> "מחוז דרום, כולל אילת."
+                            "center" -> "מחוזות תל אביב והמרכז."
+                            "north" -> "מחוזות חיפה והצפון."
                             "off" -> "אף מודעה לא מוצגת, ולא יורד כסף."
                             else -> "חלק מהקמפיינים הופעלו ידנית. בחירה למטה תסדר את כולם."
                         },
@@ -363,23 +364,51 @@ private fun PeriodChip(label: String, selected: Boolean, onClick: () -> Unit) {
     }
 }
 
+/** Which site the screen is about. Each tab says what that site is running. */
+@Composable
+fun SiteTabs(sites: List<Site>, selected: String, onSelect: (String) -> Unit) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        sites.forEach { site ->
+            val isSelected = site.id == selected
+            Column(
+                Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(if (isSelected) Palette.Ink else Palette.Card)
+                    .clickable(enabled = !isSelected) { onSelect(site.id) }
+                    .padding(vertical = 9.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    site.label, fontSize = 15.sp, fontWeight = FontWeight.Bold,
+                    color = if (isSelected) Color.White else Palette.Ink,
+                )
+                Text(
+                    modeShort(site.mode), fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
+                    color = if (site.mode == "off") Palette.InkFaint else if (isSelected) modeGlow(site.mode) else modeColor(site.mode),
+                )
+            }
+        }
+    }
+}
+
 // ── campaigns ────────────────────────────────────────────────────────────────
 
 /** Each campaign once, with whichever of its two copies is running. */
 @Composable
-fun CampaignsCard(state: AreaState) {
-    val local = state.sets.local.campaigns
+fun CampaignsCard(site: Site) {
+    val local = site.sets.local.campaigns
     SectionCard {
         Text("הקמפיינים", style = MaterialTheme.typography.titleMedium)
         Text(
-            "לכל קמפיין יש עותק ארצי ועותק אזורי, ולקמפיין היונים גם דרום, מרכז וצפון. המתג מפעיל אחד מהם.",
+            "לכל קמפיין יש עותק לכל גרסה. המתג מפעיל אחד מהם.",
             fontSize = 12.sp, color = Palette.InkFaint,
         )
         Spacer(Modifier.height(8.dp))
         local.forEachIndexed { i, l ->
             if (i > 0) Box(Modifier.fillMaxWidth().height(1.dp).background(Palette.Line))
             // A campaign's copies share its label across the sets.
-            val copies = state.sets.all.mapNotNull { (mode, set) ->
+            val copies = site.sets.all.mapNotNull { (mode, set) ->
                 set.campaigns.firstOrNull { it.label == l.label }?.let { mode to it }
             }
             CampaignRow(l, copies)
