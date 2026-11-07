@@ -58,14 +58,16 @@ private val SEGMENTS = listOf(
     Segment("local", "האזור שלי", Icons.Rounded.MyLocation),
     Segment("south", "דרום", Icons.Rounded.Place),
     Segment("center", "מרכז", Icons.Rounded.Place),
+    Segment("jerusalem", "ירושלים", Icons.Rounded.Place),
     Segment("north", "צפון", Icons.Rounded.Place),
     Segment("nationwide", "כל הארץ", Icons.Rounded.Public),
     Segment("off", "כבוי", Icons.Rounded.PowerSettingsNew),
 )
-private const val COLUMNS = 3
+/** Three across, with כבוי alone on the last row. */
+private val ROWS = SEGMENTS.chunked(3)
 
 /**
- * The switch. Six segments in two rows, one sliding pill in the running state's colour.
+ * The switch. Seven segments in three rows, one sliding pill in the running state's colour.
  *
  * The pill only ever moves to where GOOGLE says the ads are — a tap puts a
  * spinner in the tapped segment and leaves the pill where it is until the
@@ -86,33 +88,38 @@ fun ModeSwitch(
     BoxWithConstraints(
         modifier
             .fillMaxWidth()
-            .height(140.dp)
+            .height(204.dp)
             .clip(RoundedCornerShape(24.dp))
             .background(Palette.Card)
             .border(1.dp, Palette.Line, RoundedCornerShape(24.dp))
             .padding(6.dp),
     ) {
-        val segmentWidth = maxWidth / COLUMNS
-        val segmentHeight = maxHeight / (SEGMENTS.size / COLUMNS)
+        val segmentHeight = maxHeight / ROWS.size
+        val rowIndex = if (index >= 0) index / 3 else 0
+        val pillWidth by animateDpAsState(
+            maxWidth / ROWS[rowIndex].size,
+            spring(dampingRatio = 0.78f, stiffness = Spring.StiffnessMediumLow),
+        )
         val pillX by animateDpAsState(
-            segmentWidth * (if (index >= 0) index % COLUMNS else 0),
+            (maxWidth / ROWS[rowIndex].size) * (if (index >= 0) index % 3 else 0),
             spring(dampingRatio = 0.78f, stiffness = Spring.StiffnessMediumLow),
         )
         val pillY by animateDpAsState(
-            segmentHeight * (if (index >= 0) index / COLUMNS else 0),
+            segmentHeight * rowIndex,
             spring(dampingRatio = 0.78f, stiffness = Spring.StiffnessMediumLow),
         )
         Box(
             Modifier
                 .offset(x = pillX, y = pillY)
-                .width(segmentWidth)
+                .width(pillWidth)
                 .height(segmentHeight)
                 .alpha(pillAlpha)
                 .clip(RoundedCornerShape(19.dp))
                 .background(pillColor),
         )
         Column(Modifier.fillMaxWidth().fillMaxHeight()) {
-            SEGMENTS.chunked(COLUMNS).forEach { row -> Row(Modifier.fillMaxWidth().height(segmentHeight)) {
+            ROWS.forEach { row -> Row(Modifier.fillMaxWidth().height(segmentHeight)) {
+            val segmentWidth = maxWidth / row.size
             row.forEach { seg ->
                 val selected = seg.mode == mode
                 val busy = seg.mode == pendingMode

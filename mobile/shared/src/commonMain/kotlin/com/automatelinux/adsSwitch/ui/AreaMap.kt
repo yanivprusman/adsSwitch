@@ -46,7 +46,10 @@ private val REGION_BANDS = mapOf(
     "south" to (LAT_MIN to 31.85),
     "center" to (31.85 to 32.4),
     "north" to (32.4 to LAT_MAX),
+    "jerusalem" to (31.62 to 31.95),
 )
+/** A region that is a patch rather than a band across the country. */
+private val REGION_WEST = mapOf("jerusalem" to 34.88)
 
 /**
  * Where the ads run, drawn.
@@ -122,7 +125,8 @@ fun AreaMap(
         }
         drawPath(country, countryFill.copy(alpha = countryFill.alpha * alpha), style = Fill)
         REGION_BANDS[mode]?.let { (south, north) ->
-            clipRect(top = at(north, LON_MIN).y, bottom = at(south, LON_MIN).y) {
+            val west = REGION_WEST[mode]?.let { at(north, it).x } ?: 0f
+            clipRect(left = west, top = at(north, LON_MIN).y, bottom = at(south, LON_MIN).y) {
                 drawPath(country, Palette.Region.copy(alpha = 0.6f * alpha), style = Fill)
             }
         }

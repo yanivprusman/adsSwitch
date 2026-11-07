@@ -53,7 +53,7 @@ export default function SiteColumn({ site, centers, radiusKm, pending, geo, geoE
             <button key={seg.mode} type="button" data-id={`switch-${site.id}-${seg.mode}`} aria-pressed={selected} disabled={selected || !!pending}
               onClick={() => onSwitch(site.id, seg.mode)}
               style={selected ? { background: modeColor(seg.mode) } : undefined}
-              className={`h-12 rounded-xl text-[15px] font-semibold transition-colors ${selected ? "cursor-default font-bold text-white" : pending ? "cursor-not-allowed text-[#979DA3]" : "cursor-pointer text-[#5B6268] hover:bg-[#ECEEF0] hover:text-[#14181B] active:scale-95"} ${busy ? "animate-pulse ring-2 ring-[#14181B]" : ""}`}>
+              className={`h-12 rounded-xl text-[15px] ${seg.mode === "off" ? "col-span-3" : ""} font-semibold transition-colors ${selected ? "cursor-default font-bold text-white" : pending ? "cursor-not-allowed text-[#979DA3]" : "cursor-pointer text-[#5B6268] hover:bg-[#ECEEF0] hover:text-[#14181B] active:scale-95"} ${busy ? "animate-pulse ring-2 ring-[#14181B]" : ""}`}>
               {seg.label}
             </button>
           );

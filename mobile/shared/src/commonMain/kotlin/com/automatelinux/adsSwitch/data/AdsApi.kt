@@ -42,12 +42,13 @@ data class Sets(
     val south: AdSet = AdSet(),
     val center: AdSet = AdSet(),
     val north: AdSet = AdSet(),
+    val jerusalem: AdSet = AdSet(),
 ) {
     /** Every set by its mode name, in the order the switch shows them. */
     val all: List<Pair<String, AdSet>>
         get() = listOf(
             "local" to local, "nationwide" to nationwide,
-            "south" to south, "center" to center, "north" to north,
+            "south" to south, "center" to center, "north" to north, "jerusalem" to jerusalem,
         )
 
     fun of(mode: String): AdSet? = all.firstOrNull { it.first == mode }?.second
@@ -60,7 +61,7 @@ data class Site(val id: String, val label: String, val mode: String, val sets: S
 @Serializable
 data class Center(val name: String, val he: String = "", val lat: Double, val lon: Double)
 
-/** `mode` is local | nationwide | south | center | north | off | mixed (campaigns toggled by hand). */
+/** `mode` is local | nationwide | south | center | north | jerusalem | off | mixed (campaigns toggled by hand). */
 @Serializable
 data class AreaState(
     val ok: Boolean = false,

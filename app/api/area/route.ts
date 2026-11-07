@@ -5,7 +5,7 @@ import { authorize } from "@/lib/auth";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const MODES = new Set(["local", "nationwide", "south", "center", "north", "off"]);
+const MODES = new Set(["local", "nationwide", "south", "center", "north", "jerusalem", "off"]);
 const SITES = new Set(["pigeons", "etc", "panelshed"]);
 
 async function relay(command: Record<string, unknown>) {
@@ -28,7 +28,7 @@ export async function GET(request: Request) {
   return relay({ command: "adsArea" });
 }
 
-/** Switch one site: { "site": "pigeons" | "etc" | "panelshed", "mode": "local" | "nationwide" | "south" | "center" | "north" | "off" }. The reply is the state
+/** Switch one site: { "site": "pigeons" | "etc" | "panelshed", "mode": "local" | "nationwide" | "south" | "center" | "north" | "jerusalem" | "off" }. The reply is the state
  *  re-read from Google afterwards, not an echo of the request. */
 export async function POST(request: Request) {
   const denied = authorize(request);

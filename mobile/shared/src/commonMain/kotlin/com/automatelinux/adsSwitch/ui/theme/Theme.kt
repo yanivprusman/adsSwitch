@@ -47,7 +47,7 @@ object Palette {
 fun modeColor(mode: String): Color = when (mode) {
     "local" -> Palette.Local
     "nationwide" -> Palette.National
-    "south", "center", "north" -> Palette.Region
+    "south", "center", "north", "jerusalem" -> Palette.Region
     "mixed" -> Palette.Mixed
     else -> Palette.Off
 }
@@ -55,14 +55,14 @@ fun modeColor(mode: String): Color = when (mode) {
 fun modeGlow(mode: String): Color = when (mode) {
     "local" -> Palette.LocalGlow
     "nationwide" -> Palette.NationalGlow
-    "south", "center", "north" -> Palette.RegionGlow
+    "south", "center", "north", "jerusalem" -> Palette.RegionGlow
     "mixed" -> Palette.Mixed
     else -> Palette.OffGlow
 }
 
 fun modeSoft(mode: String): Color = when (mode) {
     "local" -> Palette.LocalSoft
-    "south", "center", "north" -> Palette.RegionSoft
+    "south", "center", "north", "jerusalem" -> Palette.RegionSoft
     "nationwide" -> Palette.NationalSoft
     "mixed" -> Palette.MixedSoft
     else -> Palette.OffSoft

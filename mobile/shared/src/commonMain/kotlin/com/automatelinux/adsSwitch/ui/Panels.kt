@@ -97,6 +97,7 @@ fun Hero(state: AreaState, site: Site, geo: GeoReport?, pendingMode: String?) {
                             "south" -> "מחוז דרום, כולל אילת."
                             "center" -> "מחוזות תל אביב והמרכז."
                             "north" -> "מחוזות חיפה והצפון."
+                            "jerusalem" -> "ירושלים והסביבה: מחוז ירושלים."
                             "off" -> "אף מודעה לא מוצגת, ולא יורד כסף."
                             else -> "חלק מהקמפיינים הופעלו ידנית. בחירה למטה תסדר את כולם."
                         },
@@ -464,7 +465,7 @@ private fun StatusPill(mode: String) {
     val (label, fg, bg) = when (mode) {
         "local" -> Triple("פועל באזור", Palette.Local, Palette.LocalSoft)
         "nationwide" -> Triple("פועל בכל הארץ", Palette.National, Palette.NationalSoft)
-        "south", "center", "north" -> Triple("פועל ב${modeShort(mode)}", Palette.Region, Palette.RegionSoft)
+        "south", "center", "north", "jerusalem" -> Triple("פועל ב${modeShort(mode)}", Palette.Region, Palette.RegionSoft)
         "mixed" -> Triple("כמה עותקים פועלים", Palette.Mixed, Palette.MixedSoft)
         else -> Triple("מושהה", Palette.Off, Palette.OffSoft)
     }

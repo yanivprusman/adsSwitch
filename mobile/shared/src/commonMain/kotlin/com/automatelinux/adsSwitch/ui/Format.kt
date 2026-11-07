@@ -29,6 +29,7 @@ fun modeTitle(mode: String): String = when (mode) {
     "south" -> "בדרום"
     "center" -> "במרכז"
     "north" -> "בצפון"
+    "jerusalem" -> "בירושלים"
     "off" -> "כבוי"
     "mixed" -> "מעורב"
     else -> ""
@@ -40,6 +41,7 @@ fun modeShort(mode: String): String = when (mode) {
     "south" -> "דרום"
     "center" -> "מרכז"
     "north" -> "צפון"
+    "jerusalem" -> "ירושלים"
     "off" -> "כבוי"
     else -> "מעורב"
 }

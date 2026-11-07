@@ -65,7 +65,7 @@ fun UndoStrip(nowMode: String, backTo: String, key: Int, onUndo: () -> Unit, onE
                 when (nowMode) {
                     "local" -> "עבר לאזור שלך"
                     "nationwide" -> "עבר לכל הארץ"
-                    "south", "center", "north" -> "עבר ל${modeShort(nowMode)}"
+                    "south", "center", "north", "jerusalem" -> "עבר ל${modeShort(nowMode)}"
                     "off" -> "כל המודעות כובו"
                     else -> "עודכן"
                 },
