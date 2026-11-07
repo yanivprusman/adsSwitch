@@ -6,6 +6,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const MODES = new Set(["local", "nationwide", "south", "center", "north", "off"]);
+const SITES = new Set(["pigeons", "etc", "panelshed"]);
 
 async function relay(command: Record<string, unknown>) {
   try {
@@ -27,7 +28,7 @@ export async function GET(request: Request) {
   return relay({ command: "adsArea" });
 }
 
-/** Switch: { "mode": "local" | "nationwide" | "south" | "center" | "north" | "off" }. The reply is the state
+/** Switch one site: { "site": "pigeons" | "etc" | "panelshed", "mode": "local" | "nationwide" | "south" | "center" | "north" | "off" }. The reply is the state
  *  re-read from Google afterwards, not an echo of the request. */
 export async function POST(request: Request) {
   const denied = authorize(request);
@@ -46,5 +47,11 @@ export async function POST(request: Request) {
       { ok: false, error: `mode must be one of: ${[...MODES].join(", ")}` },
       { status: 400 },
     );
-  return relay({ command: "adsArea", mode });
+  const site = String(body.site ?? "");
+  if (!SITES.has(site))
+    return NextResponse.json(
+      { ok: false, error: `site must be one of: ${[...SITES].join(", ")}` },
+      { status: 400 },
+    );
+  return relay({ command: "adsArea", site, mode });
 }

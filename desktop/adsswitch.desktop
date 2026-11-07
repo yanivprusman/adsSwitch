@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=מודעות
+Comment=Which version of each site's Google Ads runs, and what it costs
+Exec=/opt/dev/adsSwitch/scripts/open-desktop.sh
+Icon=/opt/dev/adsSwitch/app/icon.svg
+Terminal=false
+Categories=Network;Office;

@@ -3,8 +3,8 @@ import "./globals.css";
 import FeedbackChatMount from "./FeedbackChatMount";
 
 export const metadata: Metadata = {
-  title: "adsSwitch",
-  description: "מודעות — one tap switches Google Ads between the nationwide set and the local set (Be'er Sheva + Midreshet Ben-Gurion), or turns them all off",
+  title: "מודעות",
+  description: "איזו גרסה של המודעות רצה בכל אתר, ומה זה עולה",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
