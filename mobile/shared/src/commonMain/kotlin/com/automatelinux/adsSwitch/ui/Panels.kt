@@ -62,13 +62,9 @@ import com.automatelinux.adsSwitch.ui.theme.modeGlow
 fun Hero(state: AreaState, geo: GeoReport?, pendingMode: String?) {
     val mode = state.mode
     val glow by animateColorAsState(modeGlow(mode), tween(500))
-    val running = when (mode) {
-        "local" -> state.sets.local
-        "nationwide" -> state.sets.nationwide
-        else -> null
-    }
-    val todayCost = state.sets.local.todayCostIls + state.sets.nationwide.todayCostIls
-    val todayClicks = state.sets.local.todayClicks + state.sets.nationwide.todayClicks
+    val running = state.sets.of(mode)
+    val todayCost = state.sets.all.sumOf { it.second.todayCostIls }
+    val todayClicks = state.sets.all.sumOf { it.second.todayClicks }
 
     Row(
         Modifier
@@ -97,6 +93,9 @@ fun Hero(state: AreaState, geo: GeoReport?, pendingMode: String?) {
                                 "${state.radiusKm.toInt()} ק״מ סביב $names"
                             }
                             "nationwide" -> "כל ישראל. המעגלים המקווקווים הם האזור שלך."
+                            "south" -> "מחוז דרום, כולל אילת. רק קמפיין היונים פועל."
+                            "center" -> "מחוזות תל אביב והמרכז. רק קמפיין היונים פועל."
+                            "north" -> "מחוזות חיפה והצפון. רק קמפיין היונים פועל."
                             "off" -> "אף מודעה לא מוצגת, ולא יורד כסף."
                             else -> "חלק מהקמפיינים הופעלו ידנית. בחירה למטה תסדר את כולם."
                         },
@@ -370,34 +369,35 @@ private fun PeriodChip(label: String, selected: Boolean, onClick: () -> Unit) {
 @Composable
 fun CampaignsCard(state: AreaState) {
     val local = state.sets.local.campaigns
-    val national = state.sets.nationwide.campaigns
     SectionCard {
         Text("הקמפיינים", style = MaterialTheme.typography.titleMedium)
         Text(
-            "לכל קמפיין יש עותק ארצי ועותק אזורי. המתג מפעיל אחד מהם.",
+            "לכל קמפיין יש עותק ארצי ועותק אזורי, ולקמפיין היונים גם דרום, מרכז וצפון. המתג מפעיל אחד מהם.",
             fontSize = 12.sp, color = Palette.InkFaint,
         )
         Spacer(Modifier.height(8.dp))
         local.forEachIndexed { i, l ->
-            val n = national.getOrNull(i)
             if (i > 0) Box(Modifier.fillMaxWidth().height(1.dp).background(Palette.Line))
-            CampaignRow(l, n)
+            // A campaign's copies share its label across the sets.
+            val copies = state.sets.all.mapNotNull { (mode, set) ->
+                set.campaigns.firstOrNull { it.label == l.label }?.let { mode to it }
+            }
+            CampaignRow(l, copies)
         }
     }
 }
 
 @Composable
-private fun CampaignRow(local: Campaign, national: Campaign?) {
-    val both = local.enabled && national?.enabled == true
-    val runMode = when {
-        both -> "mixed"
-        local.enabled -> "local"
-        national?.enabled == true -> "nationwide"
-        else -> "off"
+private fun CampaignRow(local: Campaign, copies: List<Pair<String, Campaign>>) {
+    val on = copies.filter { it.second.enabled }
+    val runMode = when (on.size) {
+        0 -> "off"
+        1 -> on[0].first
+        else -> "mixed"
     }
-    val running = if (national?.enabled == true && !local.enabled) national else local
-    val cost = local.todayCostIls + (national?.todayCostIls ?: 0.0)
-    val clicks = local.todayClicks + (national?.todayClicks ?: 0)
+    val running = on.firstOrNull()?.second ?: local
+    val cost = copies.sumOf { it.second.todayCostIls }
+    val clicks = copies.sumOf { it.second.todayClicks }
 
     Column(Modifier.fillMaxWidth().padding(vertical = 12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -435,7 +435,8 @@ private fun StatusPill(mode: String) {
     val (label, fg, bg) = when (mode) {
         "local" -> Triple("פועל באזור", Palette.Local, Palette.LocalSoft)
         "nationwide" -> Triple("פועל בכל הארץ", Palette.National, Palette.NationalSoft)
-        "mixed" -> Triple("שני העותקים פועלים", Palette.Mixed, Palette.MixedSoft)
+        "south", "center", "north" -> Triple("פועל ב${modeShort(mode)}", Palette.Region, Palette.RegionSoft)
+        "mixed" -> Triple("כמה עותקים פועלים", Palette.Mixed, Palette.MixedSoft)
         else -> Triple("מושהה", Palette.Off, Palette.OffSoft)
     }
     Row(

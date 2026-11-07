@@ -36,12 +36,27 @@ data class AdSet(
 )
 
 @Serializable
-data class Sets(val local: AdSet = AdSet(), val nationwide: AdSet = AdSet())
+data class Sets(
+    val local: AdSet = AdSet(),
+    val nationwide: AdSet = AdSet(),
+    val south: AdSet = AdSet(),
+    val center: AdSet = AdSet(),
+    val north: AdSet = AdSet(),
+) {
+    /** Every set by its mode name, in the order the switch shows them. */
+    val all: List<Pair<String, AdSet>>
+        get() = listOf(
+            "local" to local, "nationwide" to nationwide,
+            "south" to south, "center" to center, "north" to north,
+        )
+
+    fun of(mode: String): AdSet? = all.firstOrNull { it.first == mode }?.second
+}
 
 @Serializable
 data class Center(val name: String, val he: String = "", val lat: Double, val lon: Double)
 
-/** `mode` is local | nationwide | off | mixed (campaigns toggled by hand). */
+/** `mode` is local | nationwide | south | center | north | off | mixed (campaigns toggled by hand). */
 @Serializable
 data class AreaState(
     val ok: Boolean = false,

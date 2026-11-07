@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import com.automatelinux.adsSwitch.data.Center
@@ -41,6 +42,11 @@ private const val LON_MAX = 35.98
 private const val LAT_MIN = 29.42
 private const val LAT_MAX = 33.36
 private val LON_SCALE = cos(31.4 * PI / 180)
+private val REGION_BANDS = mapOf(
+    "south" to (LAT_MIN to 31.85),
+    "center" to (31.85 to 32.4),
+    "north" to (32.4 to LAT_MAX),
+)
 
 /**
  * Where the ads run, drawn.
@@ -52,6 +58,8 @@ private val LON_SCALE = cos(31.4 * PI / 180)
  * - Dots are the cities clicks came from over the chosen period, sized by
  *   spend: green inside a circle, pale outside. They answer the question the
  *   switch exists for — is the money landing near home?
+ * - A region's rough band of the country fills when that region runs. The bands
+ *   are latitudes, not district borders: a picture of "where", not a boundary.
  * - While a switch is on its way to Google, the whole drawing pulses.
  */
 @Composable
@@ -113,6 +121,11 @@ fun AreaMap(
             close()
         }
         drawPath(country, countryFill.copy(alpha = countryFill.alpha * alpha), style = Fill)
+        REGION_BANDS[mode]?.let { (south, north) ->
+            clipRect(top = at(north, LON_MIN).y, bottom = at(south, LON_MIN).y) {
+                drawPath(country, Palette.Region.copy(alpha = 0.6f * alpha), style = Fill)
+            }
+        }
         drawPath(
             country, countryEdge.copy(alpha = countryEdge.alpha * alpha),
             style = Stroke(width = 1.2f * density, join = StrokeJoin.Round),

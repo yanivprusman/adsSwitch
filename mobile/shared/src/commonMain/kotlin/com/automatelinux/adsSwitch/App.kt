@@ -74,7 +74,8 @@ import kotlinx.coroutines.launch
  * מודעות — where the Google Ads run, and whether that is working.
  *
  * Every campaign exists twice: nationwide, and a local twin limited to 35 km
- * around Be'er Sheva and Midreshet Ben-Gurion. The switch picks which SET
+ * around Be'er Sheva and Midreshet Ben-Gurion; the pigeon campaign also has a
+ * copy each for the south, center and north. The switch picks which SET
  * runs; the daemon flips all of them in one atomic change.
  *
  * Nothing is decided or assumed on the phone. What is shown as running is what
@@ -234,7 +235,7 @@ fun App(baseUrl: String, token: String, resumeKey: Int = 0) {
                                         )
                                     } else {
                                         Text(
-                                            "כל ${s.sets.local.campaigns.size} הקמפיינים עוברים יחד, ואפשר לבטל מיד אחרי.",
+                                            "הבחירה מעדכנת את כל הקמפיינים יחד, ואפשר לבטל מיד אחרי.",
                                             fontSize = 12.sp, color = Palette.InkFaint,
                                             modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp),
                                         )

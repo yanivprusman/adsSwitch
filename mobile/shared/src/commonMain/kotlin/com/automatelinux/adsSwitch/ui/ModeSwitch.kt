@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.MyLocation
+import androidx.compose.material.icons.rounded.Place
 import androidx.compose.material.icons.rounded.PowerSettingsNew
 import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material3.CircularProgressIndicator
@@ -54,13 +55,17 @@ import com.automatelinux.adsSwitch.ui.theme.modeColor
 private data class Segment(val mode: String, val label: String, val icon: ImageVector)
 
 private val SEGMENTS = listOf(
-    Segment("local", "אזורי", Icons.Rounded.MyLocation),
+    Segment("local", "האזור שלי", Icons.Rounded.MyLocation),
+    Segment("south", "דרום", Icons.Rounded.Place),
+    Segment("center", "מרכז", Icons.Rounded.Place),
+    Segment("north", "צפון", Icons.Rounded.Place),
     Segment("nationwide", "כל הארץ", Icons.Rounded.Public),
     Segment("off", "כבוי", Icons.Rounded.PowerSettingsNew),
 )
+private const val COLUMNS = 3
 
 /**
- * The switch. Three segments, one sliding pill in the running state's colour.
+ * The switch. Six segments in two rows, one sliding pill in the running state's colour.
  *
  * The pill only ever moves to where GOOGLE says the ads are — a tap puts a
  * spinner in the tapped segment and leaves the pill where it is until the
@@ -81,28 +86,34 @@ fun ModeSwitch(
     BoxWithConstraints(
         modifier
             .fillMaxWidth()
-            .height(76.dp)
+            .height(140.dp)
             .clip(RoundedCornerShape(24.dp))
             .background(Palette.Card)
             .border(1.dp, Palette.Line, RoundedCornerShape(24.dp))
             .padding(6.dp),
     ) {
-        val segmentWidth = maxWidth / SEGMENTS.size
-        val pillOffset by animateDpAsState(
-            segmentWidth * (if (index >= 0) index else 0),
+        val segmentWidth = maxWidth / COLUMNS
+        val segmentHeight = maxHeight / (SEGMENTS.size / COLUMNS)
+        val pillX by animateDpAsState(
+            segmentWidth * (if (index >= 0) index % COLUMNS else 0),
+            spring(dampingRatio = 0.78f, stiffness = Spring.StiffnessMediumLow),
+        )
+        val pillY by animateDpAsState(
+            segmentHeight * (if (index >= 0) index / COLUMNS else 0),
             spring(dampingRatio = 0.78f, stiffness = Spring.StiffnessMediumLow),
         )
         Box(
             Modifier
-                .offset(x = pillOffset)
+                .offset(x = pillX, y = pillY)
                 .width(segmentWidth)
-                .fillMaxHeight()
+                .height(segmentHeight)
                 .alpha(pillAlpha)
                 .clip(RoundedCornerShape(19.dp))
                 .background(pillColor),
         )
-        Row(Modifier.fillMaxWidth().fillMaxHeight()) {
-            SEGMENTS.forEach { seg ->
+        Column(Modifier.fillMaxWidth().fillMaxHeight()) {
+            SEGMENTS.chunked(COLUMNS).forEach { row -> Row(Modifier.fillMaxWidth().height(segmentHeight)) {
+            row.forEach { seg ->
                 val selected = seg.mode == mode
                 val busy = seg.mode == pendingMode
                 val press = remember { MutableInteractionSource() }
@@ -153,6 +164,7 @@ fun ModeSwitch(
                     }
                 }
             }
+            } }
         }
     }
 }

@@ -5,7 +5,7 @@ import { authorize } from "@/lib/auth";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const MODES = new Set(["local", "nationwide", "off"]);
+const MODES = new Set(["local", "nationwide", "south", "center", "north", "off"]);
 
 async function relay(command: Record<string, unknown>) {
   try {
@@ -27,7 +27,7 @@ export async function GET(request: Request) {
   return relay({ command: "adsArea" });
 }
 
-/** Switch: { "mode": "local" | "nationwide" | "off" }. The reply is the state
+/** Switch: { "mode": "local" | "nationwide" | "south" | "center" | "north" | "off" }. The reply is the state
  *  re-read from Google afterwards, not an echo of the request. */
 export async function POST(request: Request) {
   const denied = authorize(request);
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
   const mode = String(body.mode ?? "");
   if (!MODES.has(mode))
     return NextResponse.json(
-      { ok: false, error: "mode must be local, nationwide or off" },
+      { ok: false, error: `mode must be one of: ${[...MODES].join(", ")}` },
       { status: 400 },
     );
   return relay({ command: "adsArea", mode });

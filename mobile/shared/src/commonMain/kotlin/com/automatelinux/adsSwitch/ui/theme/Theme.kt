@@ -32,6 +32,9 @@ object Palette {
     val National = Color(0xFF2563EB)
     val NationalGlow = Color(0xFF60A5FA)
     val NationalSoft = Color(0xFFE4ECFD)
+    val Region = Color(0xFF7C3AED)
+    val RegionGlow = Color(0xFFA78BFA)
+    val RegionSoft = Color(0xFFEFE9FD)
     val Off = Color(0xFF6B7280)
     val OffGlow = Color(0xFFB4BAC1)
     val OffSoft = Color(0xFFECEEF0)
@@ -44,6 +47,7 @@ object Palette {
 fun modeColor(mode: String): Color = when (mode) {
     "local" -> Palette.Local
     "nationwide" -> Palette.National
+    "south", "center", "north" -> Palette.Region
     "mixed" -> Palette.Mixed
     else -> Palette.Off
 }
@@ -51,12 +55,14 @@ fun modeColor(mode: String): Color = when (mode) {
 fun modeGlow(mode: String): Color = when (mode) {
     "local" -> Palette.LocalGlow
     "nationwide" -> Palette.NationalGlow
+    "south", "center", "north" -> Palette.RegionGlow
     "mixed" -> Palette.Mixed
     else -> Palette.OffGlow
 }
 
 fun modeSoft(mode: String): Color = when (mode) {
     "local" -> Palette.LocalSoft
+    "south", "center", "north" -> Palette.RegionSoft
     "nationwide" -> Palette.NationalSoft
     "mixed" -> Palette.MixedSoft
     else -> Palette.OffSoft

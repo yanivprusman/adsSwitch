@@ -26,6 +26,9 @@ fun clock(iso: String): String = if (iso.length >= 16) iso.substring(11, 16) els
 fun modeTitle(mode: String): String = when (mode) {
     "local" -> "באזור שלך"
     "nationwide" -> "בכל הארץ"
+    "south" -> "בדרום"
+    "center" -> "במרכז"
+    "north" -> "בצפון"
     "off" -> "כבוי"
     "mixed" -> "מעורב"
     else -> ""
@@ -34,6 +37,9 @@ fun modeTitle(mode: String): String = when (mode) {
 fun modeShort(mode: String): String = when (mode) {
     "local" -> "אזורי"
     "nationwide" -> "כל הארץ"
+    "south" -> "דרום"
+    "center" -> "מרכז"
+    "north" -> "צפון"
     "off" -> "כבוי"
     else -> "מעורב"
 }
