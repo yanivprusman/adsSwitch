@@ -94,6 +94,7 @@ fun ModeSwitch(
             .border(1.dp, Palette.Line, RoundedCornerShape(24.dp))
             .padding(6.dp),
     ) {
+        val fullWidth = maxWidth
         val segmentHeight = maxHeight / ROWS.size
         val rowIndex = if (index >= 0) index / 3 else 0
         val pillWidth by animateDpAsState(
@@ -119,7 +120,7 @@ fun ModeSwitch(
         )
         Column(Modifier.fillMaxWidth().fillMaxHeight()) {
             ROWS.forEach { row -> Row(Modifier.fillMaxWidth().height(segmentHeight)) {
-            val segmentWidth = maxWidth / row.size
+            val segmentWidth = fullWidth / row.size
             row.forEach { seg ->
                 val selected = seg.mode == mode
                 val busy = seg.mode == pendingMode
